@@ -1,0 +1,6 @@
+# LLM-BaiduPan-Organizer 核心依赖包
+webdav4>=0.10.0
+httpx>=0.24.0
+openai>=1.0.0
+python-dotenv>=1.0.0
+requests>=2.28.0

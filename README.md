@@ -1,0 +1,101 @@
+# 百度网盘 LLM 智能整理系统 (LLM-BaiduPan-Organizer)
+
+[![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
+[![WebDAV](https://img.shields.io/badge/WebDAV-AList-green.svg)](https://alist.nn.ci/)
+[![LLM](https://img.shields.io/badge/LLM-A%2BB%E5%8F%8C%E6%A8%A1%E5%88%86%E7%B1%BB-orange.svg)]()
+[![Safety](https://img.shields.io/badge/Safety-100%25%E8%BD%AF%E9%9A%94%E7%A6%BB%E9%9B%B6%E7%89%A9%E7%90%86%E5%88%A0%E9%99%A4-brightgreen.svg)]()
+
+专为个人与多成员家庭海量百度网盘（数十万文件、TB 级别）定制的高安全、分层智能规整与两级归档系统。
+
+---
+
+## 🌟 核心特性
+
+- **免安装 AList 本地网关**：内置绿色版 AList，自动完成百度网盘扫码挂载，提供高兼容标准 WebDAV 接口，杜绝网盘客户端直接操作风险。
+- **成套资源聚合保全**：启发式规则同构序列识别（讲次、集数、年份、年级），将 AMC8、高思、学而思、牛津树、思泉大语文等成套课件完整保留，绝不过度粉碎。
+- **四维联合结构指纹查重**：`文件数 : 总体积 : 核心文件 : 子目录` 联合哈希，抗同名碰撞，精准定位完全重复的多余副本。
+- **A+B 双模两级分层分类**：
+  - **A 模型（my-fast-gptoss）**：大领域宏观语义聚类，动态提炼标准化二级细分子系列；
+  - **B 模型（本地 Kev 0.5B）**：微观极速单选决策，本地毫秒级匹配归属，无惧网络波动。
+- **100% 软隔离零物理删除保障**：
+  - 确凿重复副本移入 `/_待清理隔离区/01_确凿重复副本/`；
+  - 用户打 `x` 待删除资源移入 `/_待清理隔离区/03_待删除/`；
+  - 同名目录自动添加 `_副本1`、`_副本2`，绝不物理删除任何文件，所有操作支持一键原路逆序回滚。
+- **四重防风控与反限流体系**：严格单线程串行移动、`1.0 ~ 2.5` 秒拟人化动态随机延时、指数退避重试、单步原子写回断点续跑。
+
+---
+
+## 🚀 极速上手流水线
+
+所有操作均在项目根目录下通过 **Windows PowerShell** 执行：
+
+### 1. 环境准备与网关启动
+```powershell
+python run_pipeline.py init
+```
+- 后台自动拉起 AList 网关（访问 [http://localhost:5244](http://localhost:5244)，账号 `admin`，密码 `admin`）；
+- 首次使用在【存储】中添加【百度网盘】挂载至 `/baiduq` 并扫码登录。
+
+### 2. 全盘单线程扫描
+```powershell
+python run_pipeline.py scan
+```
+- 扫描全盘目录树，单线程随机延时防爬，结果缓存至 `cache/disk_tree_cache.json`（支持随时断点续扫，二次运行秒级复用）。
+
+### 3. 智能两级层级化规划
+```powershell
+python run_pipeline.py plan
+```
+- 自动执行成套识别、四维去重、广告净化与 A+B 两级智能分类；
+- 导出三大交付物：
+  - 汇总报告：[`output/网盘整理规划方案.md`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/%E7%BD%91%E7%9B%98%E6%95%B4%E7%90%86%E8%A7%84%E5%88%92%E6%96%B9%E6%A1%88.md)
+  - 全量明细总表：[`output/organize_plan.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/organize_plan.csv)
+  - 分领域切片目录：[`output/slices/`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/)（含 9 个独立领域的切片 CSV）
+
+### 4. 人工审核、打 x 待删除与一键秒级刷新
+在 Excel 或 WPS 中打开任一切片表格进行微调：
+- **标记待删除**：在任意行的 `delete` 列填入 **`x`**；
+- **微调目标路径**：直接修改 `target_path` 列；
+- **临时跳过某项**：将 `status` 改为 `SKIP`；
+- **保存后一键同步**（无需调用大模型，1 秒自动完成同名防碰撞并同步刷新）：
+  ```powershell
+  python run_pipeline.py refresh-plan
+  ```
+
+### 5. 仿真预览与正式执行
+```powershell
+# 1. 无风险仿真预览（不移动任何真实文件）
+python run_pipeline.py execute --dry-run
+
+# 2. 正式受控单线程执行（带同名保护与断点续跑）
+python run_pipeline.py execute
+
+# 3. 如需紧急原路恢复
+python run_pipeline.py undo
+```
+
+---
+
+## 📊 分领域切片与规划体系
+
+全盘共 **811** 项操作单元，切片分类一览：
+
+| 领域切片表 | 数量 | 典型代表资源 |
+| :--- | :---: | :--- |
+| [`01_小学数学_竞赛与常规.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/01_小学数学_竞赛与常规.csv) | 71 项 | AMC8真题、高思课本与导引、学而思大白本、袋鼠竞赛、公文数学 |
+| [`02_小学语文与英语.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/02_小学语文与英语.csv) | 39 项 | 思泉大语文全套、窦神、好字在、牛津树1-14、Raz分级阅读、KET/PET真题 |
+| [`03_少儿通识与素养.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/03_少儿通识与素养.csv) | 46 项 | 少儿编程、科普百科、趣味历史地理、艺术绘画书法、家庭教育指南 |
+| [`04_儿童听读与娱乐.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/04_儿童听读与娱乐.csv) | 21 项 | 凯叔讲故事系列(西游记/三国等)、钱儿爸系列、原版少儿听读动画 |
+| [`05_工作研报与经管学术.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/05_工作研报与经管学术.csv) | 67 项 | 量化与金工多因子(Alpha101/GTJA191)、券商研报、期权策略、社科经管精读 |
+| [`06_影视影音与音频素材.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/06_影视影音与音频素材.csv) | 16 项 | 经典美剧、高清电影、音乐音频与音效素材库 |
+| [`07_个人生活_相册与工具.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/07_个人生活_相册与工具.csv) | 148 项 | 家庭照片相册备份、系统装机软件与工具备份 |
+| [`08_建议清理隔离区.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/08_建议清理隔离区.csv) | 394 项 | **重点清理隔离**：27 项确凿重复副本 + 367 项用户打 x 待删除资源 |
+| [`09_其他待复核.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/09_其他待复核.csv) | 9 项 | 少数纯数字或特殊命名待复核资源 |
+
+---
+
+## 📚 详细文档导航
+
+- 📘 **用户操作全流程详述**：请参阅 [`使用说明.md`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/使用说明.md)
+- 🛠️ **系统架构与算法源码技术剖析**：请参阅 [`开发文档.md`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/开发文档.md)
+- 📑 **全盘分类统计与两级结构规划方案**：请参阅 [`output/网盘整理规划方案.md`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/%E7%BD%91%E7%9B%98%E6%95%B4%E7%90%86%E8%A7%84%E5%88%92%E6%96%B9%E6%A1%88.md)
