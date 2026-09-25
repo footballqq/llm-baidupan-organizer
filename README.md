@@ -48,9 +48,9 @@ python run_pipeline.py plan
 ```
 - 自动执行成套识别、四维去重、广告净化与 A+B 两级智能分类；
 - 导出三大交付物：
-  - 汇总报告：[`output/网盘整理规划方案.md`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/%E7%BD%91%E7%9B%98%E6%95%B4%E7%90%86%E8%A7%84%E5%88%92%E6%96%B9%E6%A1%88.md)
-  - 全量明细总表：[`output/organize_plan.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/organize_plan.csv)
-  - 分领域切片目录：[`output/slices/`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/)（含 9 个独立领域的切片 CSV）
+  - 汇总报告：`output/网盘整理规划方案.md`
+  - 全量明细总表：`output/organize_plan.csv`
+  - 分领域切片目录：`output/slices/`（含 9 个独立领域的切片 CSV）
 
 ### 4. 人工审核、打 x 待删除与一键秒级刷新
 在 Excel 或 WPS 中打开任一切片表格进行微调：
@@ -82,20 +82,20 @@ python run_pipeline.py undo
 
 | 领域切片表 | 数量 | 典型代表资源 |
 | :--- | :---: | :--- |
-| [`01_小学数学_竞赛与常规.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/01_小学数学_竞赛与常规.csv) | 71 项 | AMC8真题、高思课本与导引、学而思大白本、袋鼠竞赛、公文数学 |
-| [`02_小学语文与英语.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/02_小学语文与英语.csv) | 39 项 | 思泉大语文全套、窦神、好字在、牛津树1-14、Raz分级阅读、KET/PET真题 |
-| [`03_少儿通识与素养.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/03_少儿通识与素养.csv) | 46 项 | 少儿编程、科普百科、趣味历史地理、艺术绘画书法、家庭教育指南 |
-| [`04_儿童听读与娱乐.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/04_儿童听读与娱乐.csv) | 21 项 | 凯叔讲故事系列(西游记/三国等)、钱儿爸系列、原版少儿听读动画 |
-| [`05_工作研报与经管学术.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/05_工作研报与经管学术.csv) | 67 项 | 量化与金工多因子(Alpha101/GTJA191)、券商研报、期权策略、社科经管精读 |
-| [`06_影视影音与音频素材.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/06_影视影音与音频素材.csv) | 16 项 | 经典美剧、高清电影、音乐音频与音效素材库 |
-| [`07_个人生活_相册与工具.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/07_个人生活_相册与工具.csv) | 148 项 | 家庭照片相册备份、系统装机软件与工具备份 |
-| [`08_建议清理隔离区.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/08_建议清理隔离区.csv) | 394 项 | **重点清理隔离**：27 项确凿重复副本 + 367 项用户打 x 待删除资源 |
-| [`09_其他待复核.csv`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/slices/09_其他待复核.csv) | 9 项 | 少数纯数字或特殊命名待复核资源 |
+| `01_小学数学_竞赛与常规.csv` | 71 项 | AMC8真题、高思课本与导引、学而思大白本、袋鼠竞赛、公文数学 |
+| `02_小学语文与英语.csv` | 39 项 | 思泉大语文全套、窦神、好字在、牛津树1-14、Raz分级阅读、KET/PET真题 |
+| `03_少儿通识与素养.csv` | 46 项 | 少儿编程、科普百科、趣味历史地理、艺术绘画书法、家庭教育指南 |
+| `04_儿童听读与娱乐.csv` | 21 项 | 凯叔讲故事系列(西游记/三国等)、钱儿爸系列、原版少儿听读动画 |
+| `05_工作研报与经管学术.csv` | 67 项 | 量化与金工多因子(Alpha101/GTJA191)、券商研报、期权策略、社科经管精读 |
+| `06_影视影音与音频素材.csv` | 16 项 | 经典美剧、高清电影、音乐音频与音效素材库 |
+| `07_个人生活_相册与工具.csv` | 148 项 | 家庭照片相册备份、系统装机软件与工具备份 |
+| `08_建议清理隔离区.csv` | 394 项 | **重点清理隔离**：27 项确凿重复副本 + 367 项用户打 x 待删除资源 |
+| `09_其他待复核.csv` | 9 项 | 少数纯数字或特殊命名待复核资源 |
 
 ---
 
 ## 📚 详细文档导航
 
-- 📘 **用户操作全流程详述**：请参阅 [`使用说明.md`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/使用说明.md)
-- 🛠️ **系统架构与算法源码技术剖析**：请参阅 [`开发文档.md`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/开发文档.md)
-- 📑 **全盘分类统计与两级结构规划方案**：请参阅 [`output/网盘整理规划方案.md`](file:///E:/users/kpan/BaiduSyncdisk/program/aigc/utils/baiduwangpan/output/%E7%BD%91%E7%9B%98%E6%95%B4%E7%90%86%E8%A7%84%E5%88%92%E6%96%B9%E6%A1%88.md)
+- 📘 **用户操作全流程详述**：请参阅 [使用说明.md](使用说明.md)
+- 🛠️ **系统架构与算法源码技术剖析**：请参阅 [开发文档.md](开发文档.md)
+- 📰 **公众号故事长文与实操心路**：请参阅 [公众号文章_AI拯救网盘仓鼠症家长.md](公众号文章_AI拯救网盘仓鼠症家长.md)
