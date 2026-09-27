@@ -13,6 +13,7 @@ from config import (
     LLM_BASE_URL,
     LLM_API_KEY,
     LLM_MODEL,
+    ALIST_MOUNT_PATH,
     parse_llm_json,
 )
 from kev_client import KevClient
@@ -218,8 +219,9 @@ class HierarchicalClassifier:
         rec_id = 1
 
         # 1. 录入查重副本 (隔离区)
+        mount_prefix = ALIST_MOUNT_PATH.rstrip("/")
         for dup in duplicates:
-            target_path = f"/_待清理隔离区/01_确凿重复副本/{dup['duplicate_name']}"
+            target_path = f"{mount_prefix}/_待清理隔离区/01_确凿重复副本/{dup['duplicate_name']}"
             plan_records.append({
                 "id": rec_id,
                 "source_path": dup["duplicate_path"],
@@ -242,7 +244,7 @@ class HierarchicalClassifier:
         for domain, units in domain_groups.items():
             if domain.startswith("_待清理隔离区"):
                 for u in units:
-                    target_path = f"/_待清理隔离区/02_超龄早教与乐高废弃/{u.name}"
+                    target_path = f"{mount_prefix}/_待清理隔离区/02_超龄早教与乐高废弃/{u.name}"
                     plan_records.append({
                         "id": rec_id,
                         "source_path": u.path,
@@ -265,7 +267,7 @@ class HierarchicalClassifier:
                 # 针对超短无意义名称（如 S05, 1-20, draw），从核心文件中提取更好读的名字
                 cleaned_name = self._enrich_cryptic_name(u, cleaned_name)
 
-                target_dir = f"/{domain}/{subtier}"
+                target_dir = f"{mount_prefix}/{domain}/{subtier}"
                 target_path = f"{target_dir}/{cleaned_name}"
 
                 plan_records.append({

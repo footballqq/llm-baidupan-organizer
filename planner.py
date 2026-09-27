@@ -10,6 +10,7 @@ from config import (
     PLAN_CSV_FILE,
     ISOLATION_ROOT_DIR,
     DELETE_TARGET_DIR,
+    ALIST_MOUNT_PATH,
 )
 from atomic_detector import AtomicUnit
 from hierarchical_classifier import HierarchicalClassifier
@@ -94,7 +95,15 @@ class NetdiskPlanner:
                 if r.get("action") == "DELETE":
                     r["action"] = "MOVE"
 
-        # 重新导出全量 CSV、分领域切片 CSV 与 Markdown 报告
+            # 确保 target_path 带上挂载前缀
+            mount_prefix = ALIST_MOUNT_PATH.rstrip("/")
+            tgt = r.get("target_path", "").strip()
+            if tgt and mount_prefix and not tgt.startswith(mount_prefix + "/"):
+                r["target_path"] = f"{mount_prefix}/{tgt.lstrip('/')}"
+
+            # 若先前因路径问题执行失败，重置为 CONFIRMED 允许再次执行
+            if r.get("status", "").upper() == "FAILED":
+                r["status"] = "CONFIRMED"
         self._export_csv(records)
         self._export_slices(records)
         self._export_markdown(records)
@@ -166,8 +175,12 @@ class NetdiskPlanner:
             else:
                 r["delete"] = ""
                 # 继承用户自定义的 target_path（非隔离删除路径）
-                if anno.get("target_path") and not anno.get("target_path", "").startswith(f"/{ISOLATION_ROOT_DIR}/03_待删除"):
-                    r["target_path"] = anno["target_path"]
+                if anno.get("target_path") and not anno.get("target_path", "").startswith(f"{ISOLATION_ROOT_DIR}/03_待删除"):
+                    user_tgt = anno["target_path"]
+                    mount_prefix = ALIST_MOUNT_PATH.rstrip("/")
+                    if mount_prefix and not user_tgt.startswith(mount_prefix + "/"):
+                        user_tgt = f"{mount_prefix}/{user_tgt.lstrip('/')}"
+                    r["target_path"] = user_tgt
                 if anno.get("category") and not anno.get("category", "").startswith(f"{ISOLATION_ROOT_DIR}/03_待删除"):
                     r["category"] = anno["category"]
                 if anno.get("action") and anno.get("action") != "DELETE":

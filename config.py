@@ -47,7 +47,7 @@ WEBDAV_USERNAME = os.getenv("WEBDAV_USERNAME", "admin")
 WEBDAV_PASSWORD = os.getenv("WEBDAV_PASSWORD", "admin")
 
 # 百度网盘在 AList 中的挂载路径前缀（用户在 AList 中挂载为 /baiduq）
-ALIST_MOUNT_PATH = os.getenv("ALIST_MOUNT_PATH", "/baiduq")
+ALIST_MOUNT_PATH = os.getenv("ALIST_MOUNT_PATH", "/baiduq").rstrip("/")
 
 # 防风控与速率限制配置（单线程随机延时，安全防爬）
 REQUEST_MIN_DELAY = float(os.getenv("REQUEST_MIN_DELAY", "1.0"))  # 基础最小随机延时 (秒)
@@ -57,7 +57,7 @@ RETRY_BACKOFF = float(os.getenv("RETRY_BACKOFF", "3.0"))          # 指数退避
 
 # 隔离归档根目录（所有建议删除、超龄资料、查重副本均放入此目录，绝不物理删除）
 ISOLATION_ROOT_DIR = "_待清理隔离区"
-DELETE_TARGET_DIR = os.getenv("DELETE_TARGET_DIR", f"/{ISOLATION_ROOT_DIR}/03_待删除")
+DELETE_TARGET_DIR = os.getenv("DELETE_TARGET_DIR", f"{ALIST_MOUNT_PATH}/{ISOLATION_ROOT_DIR}/03_待删除")
 
 # 目标归档顶层大纲体系
 DEFAULT_TAXONOMY = {

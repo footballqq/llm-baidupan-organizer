@@ -8,6 +8,7 @@ from config import (
     PLAN_CSV_FILE,
     UNDO_HISTORY_FILE,
     EXECUTION_LOG_FILE,
+    ALIST_MOUNT_PATH,
 )
 from alist_helper import SafeWebDAVClient
 
@@ -67,6 +68,11 @@ class PlanExecutor:
             if rec.get("delete", "").strip().lower() == "x":
                 action = "DELETE"
             cleaned_name = rec.get("cleaned_name", "")
+
+            # 防御性对齐挂载路径前缀：确保目标路径与源路径同属挂载目录（防止因缺少 /baiduq 前缀导致移动至 WebDAV 虚拟根目录失败）
+            mount_prefix = ALIST_MOUNT_PATH.rstrip("/")
+            if mount_prefix and src.startswith(mount_prefix + "/") and not dst.startswith(mount_prefix + "/"):
+                dst = f"{mount_prefix}/{dst.lstrip('/')}"
 
             # 冲突检测与安全后缀计算
             resolved_dst = self._resolve_target_conflict(dst, dry_run=dry_run)
