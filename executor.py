@@ -117,9 +117,9 @@ class PlanExecutor:
                         self._log_event(f"[{idx}/{len(pending_records)}] [SKIPPED_NOT_FOUND]: '{src}' does not exist")
                         continue
 
-                # 真实单线程受控移动
+                # 真实单线程受控移动（内置两步法同名规避）
                 try:
-                    ok = self.client.move(src, resolved_dst, overwrite=False)
+                    ok = self._safe_move(src, resolved_dst)
                     item_cost = round(time.time() - item_start, 2)
                     if ok:
                         success_count += 1
@@ -214,6 +214,45 @@ class PlanExecutor:
         print(f"  [冲突防护] 目标 '{clean_target}' 已存在，自动重命名为 '{new_target}' 严防覆盖！")
         self._log_event(f"CONFLICT RESOLVED: '{clean_target}' already exists -> Auto-renamed to '{new_target}'")
         return new_target
+
+    def _safe_move(self, src: str, dst: str) -> bool:
+        """安全移动。若目标与源名称不一致（如追加了 _副本 重命名），采用两步法（源端就地重命名后再平移）规避百度网盘 errno:12 限制"""
+        if not self.client:
+            return False
+
+        src_name = PurePosixPath(src).name
+        dst_name = PurePosixPath(dst).name
+        src_parent = PurePosixPath(src).parent.as_posix()
+
+        # 若名称未变，直接跨目录移动
+        if src_name == dst_name:
+            return self.client.move(src, dst, overwrite=False)
+
+        # 名称有变：采用源端先更名、再跨目录移动的两步法
+        renamed_src = f"{src_parent}/{dst_name}"
+        try:
+            ok_rename = self.client.move(src, renamed_src)
+            if not ok_rename:
+                return False
+        except Exception:
+            return False
+
+        try:
+            ok_move = self.client.move(renamed_src, dst, overwrite=False)
+            if ok_move:
+                return True
+            # 移动失败，尝试恢复原名
+            try:
+                self.client.move(renamed_src, src)
+            except Exception:
+                pass
+            return False
+        except Exception:
+            try:
+                self.client.move(renamed_src, src)
+            except Exception:
+                pass
+            return False
 
     def _append_undo_record(self, entry: Dict[str, Any]) -> None:
         """追加记录至 undo_history.json"""
