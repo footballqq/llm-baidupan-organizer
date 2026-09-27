@@ -22,6 +22,7 @@ from config import (
     REQUEST_MAX_DELAY,
     MAX_RETRIES,
     RETRY_BACKOFF,
+    ALIST_MOUNT_PATH,
 )
 
 ALIST_BIN_DIR = BASE_DIR / "alist_bin"
@@ -196,20 +197,28 @@ class SafeWebDAVClient:
         return []
 
     def exists(self, path: str) -> bool:
-        """检查路径是否存在"""
+        """检查路径是否存在（显式 Depth: 0 避免默认 Depth: infinity 递归扫描全盘超时）"""
         clean_path = "/" + path.strip("/")
+        mount_root = f"/{ALIST_MOUNT_PATH.strip('/')}"
+        if clean_path in ["/", mount_root]:
+            return True
         try:
-            return self.client.exists(clean_path)
+            self.client.propfind(clean_path, headers={"Depth": "0"})
+            return True
         except Exception:
             return False
 
     def mkdir(self, path: str) -> bool:
-        """递归创建目录"""
+        """递归创建目录（自动跳过挂载点自身与已存在的层级）"""
         clean_path = "/" + path.strip("/")
         parts = [p for p in clean_path.split("/") if p]
+        mount_name = ALIST_MOUNT_PATH.strip("/")
         curr = ""
         for p in parts:
             curr += "/" + p
+            # 挂载点根目录（如 / 或 /baiduq）为网关存储节点，天然存在且严禁调用 mkdir
+            if curr in ["/", f"/{mount_name}"]:
+                continue
             if not self.exists(curr):
                 self._sleep_rate_limit()
                 try:
