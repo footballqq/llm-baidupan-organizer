@@ -35,39 +35,49 @@ def undo_moves() -> None:
     failed_count = 0
     skipped_count = 0
 
-    # 逆序执行回滚
-    for i in range(len(history) - 1, -1, -1):
-        item = history[i]
-        current_loc = item["destination"]
-        original_loc = item["source"]
+    try:
+        # 逆序执行回滚
+        for i in range(len(history) - 1, -1, -1):
+            item = history[i]
+            current_loc = item["destination"]
+            original_loc = item["source"]
 
-        print(f"[回滚] 正在将 '{current_loc}' 原路移回 '{original_loc}' ...")
-        if not client.exists(current_loc):
-            print(f"  [!] 目标路径已不存在（可能已被移走或删除），从记录中清除: {current_loc}")
-            rolled_back_indices.add(i)
-            skipped_count += 1
-            continue
-
-        try:
-            ok = client.move(current_loc, original_loc, overwrite=False)
-            if ok:
-                success_count += 1
+            print(f"[回滚] 正在将 '{current_loc}' 原路移回 '{original_loc}' ...")
+            if not client.exists(current_loc):
+                print(f"  [!] 目标路径已不存在（可能已被移走或删除），从记录中清除: {current_loc}")
                 rolled_back_indices.add(i)
-            else:
+                skipped_count += 1
+                continue
+
+            try:
+                ok = client.move(current_loc, original_loc, overwrite=False)
+                if ok:
+                    success_count += 1
+                    rolled_back_indices.add(i)
+                else:
+                    failed_count += 1
+                    print(f"  [!] 移动回滚失败: {current_loc}")
+            except Exception as e:
                 failed_count += 1
-                print(f"  [!] 移动回滚失败: {current_loc}")
+                print(f"  [!] 异常: {e}")
+    except KeyboardInterrupt:
+        print("\n" + "!" * 58)
+        print("[Undo] ⚠️ 捕获到用户中断信号 (Ctrl+C)！正在安全保存回滚记录...")
+        print("!" * 58)
+    finally:
+        # 只保留未成功回滚的条目（原子落盘）
+        remaining = [item for idx, item in enumerate(history) if idx not in rolled_back_indices]
+        tmp_undo = UNDO_HISTORY_FILE.with_suffix(".tmp")
+        try:
+            with open(tmp_undo, "w", encoding="utf-8") as f:
+                json.dump(remaining, f, ensure_ascii=False, indent=2)
+            tmp_undo.replace(UNDO_HISTORY_FILE)
         except Exception as e:
-            failed_count += 1
-            print(f"  [!] 异常: {e}")
+            print(f"[Undo] 写入回滚文件异常: {e}")
 
-    # 只保留未成功回滚的条目
-    remaining = [item for idx, item in enumerate(history) if idx not in rolled_back_indices]
-    with open(UNDO_HISTORY_FILE, "w", encoding="utf-8") as f:
-        json.dump(remaining, f, ensure_ascii=False, indent=2)
-
-    print("==================================================")
-    print(f"回滚完毕！成功撤销: {success_count} 项, 跳过(已不存在): {skipped_count} 项, 失败: {failed_count} 项。")
-    print("==================================================")
+        print("==================================================")
+        print(f"回滚进度报告：成功撤销: {success_count} 项, 跳过(已不存在): {skipped_count} 项, 失败: {failed_count} 项, 剩余待回滚: {len(remaining)} 项。")
+        print("==================================================")
 
 
 if __name__ == "__main__":
